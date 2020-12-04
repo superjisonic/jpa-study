@@ -9,6 +9,7 @@ public class AccountController {
 
     @GetMapping("/sign-up")
     public String signUpForm(Model model) {
+        model.addAttribute(new SignUpForm());
         return "account/sign-up"; //TymeLeaf에 따라 뷰가 찾아지면 초록줄 사라짐
     }
 }
