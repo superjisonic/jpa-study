@@ -1,15 +1,46 @@
 package com.studysonic.account;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PostMapping;
 
+import javax.validation.Valid;
+
+@RequiredArgsConstructor
 @Controller
 public class AccountController {
+
+    private final SignUpFormValidator signUpFormValidator;
+
+    @InitBinder("signUpForm") // signUpForm 이라는 데이터를 받을때, 바인딩 설정 가능
+    public void initBinder(WebDataBinder webDataBinder){
+        webDataBinder.addValidators(signUpFormValidator); //밑에있는 @Valid 어노테이션 객체의 타입을 따라간다. 카멜케이스를 따라감. 변수 이름이 바뀌어도 따라감.
+    }
+
 
     @GetMapping("/sign-up")
     public String signUpForm(Model model) {
         model.addAttribute(new SignUpForm());
         return "account/sign-up"; //TymeLeaf에 따라 뷰가 찾아지면 초록줄 사라짐
+    }
+
+    @PostMapping("/sign-up")
+    public String signUpSubmit(@Valid SignUpForm signUpForm, Errors errors){
+        if(errors.hasErrors()){
+            return "account/sign-up";
+        }
+
+//        signUpFormValidator.validate(signUpForm, errors);
+//        if(errors.hasErrors()){
+//            return "account/sign-up";
+//        } 번거로움,,,
+
+        //TODO 회원가입처리
+        return "redirect:/";
     }
 }
