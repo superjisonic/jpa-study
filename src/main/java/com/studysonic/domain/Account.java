@@ -12,7 +12,7 @@ import java.util.UUID;
 public class Account {
 
     @Id @GeneratedValue
-    private long id;
+    private Long id;
 
     @Column(unique = true)
     private String email;
@@ -54,5 +54,6 @@ public class Account {
     public void generateEmailCheckToken(){
         this.emailCheckToken = UUID.randomUUID().toString();
     }
+
 
 }

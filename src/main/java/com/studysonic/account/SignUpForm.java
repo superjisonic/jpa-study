@@ -15,6 +15,7 @@ public class SignUpForm {
     @Pattern(regexp = "^[ㄱ-ㅎ가-힣a-z0-9_-]{3,20}$") //3개부터20개까지 왼쪽의 패턴이 들어올 수 있음
     private String nickname;
 
+
     @Email
     @NotBlank
     private String email;

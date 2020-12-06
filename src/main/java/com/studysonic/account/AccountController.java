@@ -19,8 +19,7 @@ import javax.validation.Valid;
 public class AccountController {
 
     private final SignUpFormValidator signUpFormValidator;
-    private final AccountRepository accountRepository;
-    private final JavaMailSender javaMailSender;
+    private final AccountService accountService;
 
     @InitBinder("signUpForm") // signUpForm 이라는 데이터를 받을때, 바인딩 설정 가능
     public void initBinder(WebDataBinder webDataBinder){
@@ -45,26 +44,10 @@ public class AccountController {
 //            return "account/sign-up";
 //        } 번거로움,,,
 
-        Account account = Account.builder()
-                .email(signUpForm.getEmail())
-                .nickname(signUpForm.getNickname())
-                .password(signUpForm.getPassword())
-                .studyCreatedByWeb(true)
-                .studyEnrollmentResultByWeb(true)
-                .studyUpdatedByWeb(true)
-                .build();
-
-        Account newAccount = accountRepository.save(account);
-
-        //email보내기
-        newAccount.generateEmailCheckToken();
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(newAccount.getEmail());
-        mailMessage.setSubject("스터디올랭, 회원가입인증");
-        mailMessage.setText("/check-email-token?token=" + newAccount.getEmailCheckToken() +
-                "&email=" + newAccount.getEmail());
-        javaMailSender.send(mailMessage);
+        accountService.processNewAccount(signUpForm);
 
         return "redirect:/";
     }
+
+
 }
