@@ -1,7 +1,6 @@
 package com.studysonic.account;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
@@ -9,6 +8,7 @@ import org.springframework.validation.Validator;
 @RequiredArgsConstructor
 @Component
 public class SignUpFormValidator implements Validator { //SignUpForm을 검증하는 클래스 <- 밸리데이터 인터페이스를 갖고온다.
+
 
     private final AccountRepository accountRepository; //여기 ㅠㅠ final 선언 안하면 NPE 납니다 **
 

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
 @Controller
@@ -20,6 +21,7 @@ public class AccountController {
 
     private final SignUpFormValidator signUpFormValidator;
     private final AccountService accountService;
+    private final AccountRepository accountRepository;
 
     @InitBinder("signUpForm") // signUpForm 이라는 데이터를 받을때, 바인딩 설정 가능
     public void initBinder(WebDataBinder webDataBinder){
@@ -47,6 +49,26 @@ public class AccountController {
         accountService.processNewAccount(signUpForm);
 
         return "redirect:/";
+    }
+    @GetMapping("/check-email-token")
+    public String checkEmailToken(String email, String token, Model model){
+         Account account = accountRepository.findByEmail(email);
+         String view = "account/checked-email";
+         if(account == null) {
+             model.addAttribute("error", "wrong.email");
+             return view;
+         }
+         if (!account.getEmailCheckToken().equals(token)) {
+             model.addAttribute("error","wrong.email");
+             return view;
+         }
+
+         account.completeSignUp();
+
+         model.addAttribute("numberOfUser",accountRepository.count());
+         model.addAttribute("nickname",account.getNickname());
+
+         return view;
     }
 
 
