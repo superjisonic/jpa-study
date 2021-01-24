@@ -24,9 +24,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated();//이외 다른건 시큐리티 쳌
     }
 
+    //npm으로 다운받은 프론트엔드 패키지들을 사용하려면 atCommonLocations에서 요청이 오는지 확인해봐야함
+    //해당 메서드에 정의되지 않는 곳에서 요청이 온다면 시큐리티 예외 추가 설정을 해줘야함
     @Override
     public void configure(WebSecurity web) throws Exception {
         web.ignoring()
+                .mvcMatchers("/node_modules/**") //이렇게 추가
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
 
     }
