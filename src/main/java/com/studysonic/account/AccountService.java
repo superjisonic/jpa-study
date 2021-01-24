@@ -1,9 +1,15 @@
 package com.studysonic.account;
 
+import java.util.List;
+
 import com.studysonic.domain.Account;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,14 +24,19 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
 
+    //스프링시큐리티 설정을 다르게 해줘야 이걸 주입받을 수 있음. (현재 설정상 노출 안됨)
+    //private final AuthenticationManager authenticationManager;
+
     @Transactional
-    public void processNewAccount(SignUpForm signUpForm) {
+    public Account processNewAccount(SignUpForm signUpForm) {
         //새 계정 저장하기
         Account newAccount = saveNewAccount(signUpForm);
 
         //email보내기
         newAccount.generateEmailCheckToken();
         sendSignUpConfirmEmail(newAccount);
+
+        return newAccount;
     }
 
     private Account saveNewAccount(@Valid SignUpForm signUpForm) {
@@ -51,4 +62,27 @@ public class AccountService {
         javaMailSender.send(mailMessage);
     }
 
+    public void login(Account account) {
+        //정석적인 방법은 아님. 원래 아래 생성자는 User Authentication Manager 내부에서 쓰라고 만들어놓은것.
+        //첫번째 파람 - principle, 두번째 파람 - pwd, 마지막 파람 - 권한.
+        UsernamePasswordAuthenticationToken token= new UsernamePasswordAuthenticationToken(
+                account.getNickname(),
+                account.getPassword(),
+                List.of(new SimpleGrantedAuthority("ROLE_USER"))); //권한목록을 받아준다
+
+//        // 정석적인 방법 - authentification Manager(스프링 시큐리티에 정의된 빈 의존성 주)를 통해서 인증을 해야함
+//        UsernamePasswordAuthenticationToken token= new UsernamePasswordAuthenticationToken(
+//          username, password);
+//        // AuthenticationManager를 통해서 인증을 개친 authentication 객체를 컨텍스트에 넣어줘야한다.
+//        Authentication authentication = authenticationManager.authenticate(token);
+
+
+        // 정석적인 방법은 아니지만,실제 AuthenticationMananger가 하는 일을 그대로 한다.
+        // 이렇게 하는 이유 : 현재는 인코딩한 패스워드만 접근할 수 있기때문 -> 정석으로는 plain txt로 받은 비밀번호를 써야하기때문.
+        // 그런데 우리는 그 plain txt는 db에 저장도 안하고 더이상 사용하지 않기 때문에 이 방법을 쓴다.
+        SecurityContextHolder.getContext().setAuthentication(token);
+
+        // 정석적인 방법
+        //context.setAuthentication(authentication);
+    }
 }

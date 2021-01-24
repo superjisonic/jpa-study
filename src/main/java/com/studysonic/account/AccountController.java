@@ -46,29 +46,30 @@ public class AccountController {
 //            return "account/sign-up";
 //        } 번거로움,,,
 
-        accountService.processNewAccount(signUpForm);
+        Account account = accountService.processNewAccount(signUpForm);
+        accountService.login(account);
 
         return "redirect:/";
     }
     @GetMapping("/check-email-token")
-    public String checkEmailToken(String email, String token, Model model){
-         Account account = accountRepository.findByEmail(email);
-         String view = "account/checked-email";
-         if(account == null) {
-             model.addAttribute("error", "wrong.email");
-             return view;
-         }
-         if (account.isValidToken(token)) {
-             model.addAttribute("error","wrong.email");
-             return view;
-         }
+    public String checkEmailToken(String token, String email, Model model){
+        Account account = accountRepository.findByEmail(email);
+        String view = "account/checked-email";
+        if(account == null) {
+            model.addAttribute("error", "wrong.email");
+            return view;
+        }
+        if (!account.isValidToken(token)) {
+            model.addAttribute("error","wrong.token");
+            return view;
+        }
 
-         account.completeSignUp();
+        account.completeSignUp();
+        accountService.login(account);
+        model.addAttribute("numberOfUser",accountRepository.count());
+        model.addAttribute("nickname",account.getNickname());
 
-         model.addAttribute("numberOfUser",accountRepository.count());
-         model.addAttribute("nickname",account.getNickname());
-
-         return view;
+        return view;
     }
 
 
