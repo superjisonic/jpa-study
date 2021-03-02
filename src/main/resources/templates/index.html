@@ -5,7 +5,10 @@
 <head th:replace="fragments.html :: head"></head>
 <body class="bg-light">
     <div th:replace="fragments.html :: main-nav"></div>
-
+<!-- 뒤에 물음표를 붙이는 이유는 null일경우에 뒤에 프로퍼티를 참조하지 않겠다는 뜻이다 -->
+    <div class="alert alert-warning" role="alert" th:if="${account != null && !account?.emailVerified}">
+        스터디올레 가입을 완료하려면 <a href="#" th:href="@{/check-email}" class="alert-link">계정 인증 이메일을 확인</a>하세요.
+    </div>
     <div class="container">
     <div class="py-5 text-center">
         <h2>스터디소닉</h2>
@@ -13,8 +16,6 @@
     <div th:replace="fragments.html :: footer">
     </div>
 </div>
-<script src="/node_modules/jquery/dist/jquery.min.js"></script>
-<script src="/node_modules/bootstrap/dist/js/bootstrap.bundle.js"></script>
 <script type="application/javascript">
     (function () {
     }())
