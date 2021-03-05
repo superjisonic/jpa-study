@@ -18,4 +18,9 @@ public class MainController {
         return "index";
     }
 
+    @GetMapping("/login")
+    public String login(){
+        return "login"; // 프리픽스 templates/가 뷰 이름 앞에 붙는것이다. (view resolver에 의함)
+    }
+
 }

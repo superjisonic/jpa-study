@@ -22,6 +22,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/email-login", "/check-email-login", "/login-link").permitAll()
                 .mvcMatchers(HttpMethod.GET,"/profile/*").permitAll()//프로필은 겟요청만 허용해줌
                 .anyRequest().authenticated();//이외 다른건 시큐리티 쳌
+        http.formLogin()
+                .loginPage("/login").permitAll(); //로그인 한경우 안한경우 모두 허용.
+        http.logout()
+                .logoutSuccessUrl("/");//로그아웃 성공시 가는 페이지
+
     }
 
     //npm으로 다운받은 프론트엔드 패키지들을 사용하려면 atCommonLocations에서 요청이 오는지 확인해봐야함

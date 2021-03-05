@@ -10,6 +10,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +21,7 @@ import javax.validation.Valid;
 
 @RequiredArgsConstructor
 @Service
-public class AccountService {
+public class AccountService implements UserDetailsService {
 
     private final JavaMailSender javaMailSender;
     private final AccountRepository accountRepository;
@@ -66,7 +69,7 @@ public class AccountService {
         //정석적인 방법은 아님. 원래 아래 생성자는 User Authentication Manager 내부에서 쓰라고 만들어놓은것.
         //첫번째 파람 - principle, 두번째 파람 - pwd, 마지막 파람 - 권한.
         UsernamePasswordAuthenticationToken token= new UsernamePasswordAuthenticationToken(
-                account.getNickname(),
+                new UserAccount(account),
                 account.getPassword(),
                 List.of(new SimpleGrantedAuthority("ROLE_USER"))); //권한목록을 받아준다
 
@@ -84,5 +87,17 @@ public class AccountService {
 
         // 정석적인 방법
         //context.setAuthentication(authentication);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String emailOrNickname) throws UsernameNotFoundException {
+        Account account = accountRepository.findByEmail(emailOrNickname);
+        if(account == null){
+            account = accountRepository.findByNickname(emailOrNickname);
+        }
+        if(account == null){
+            throw new UsernameNotFoundException(emailOrNickname);
+        }
+        return new UserAccount(account);//principal에 해당하는 유저 정보를 넘기면된다.
     }
 }
