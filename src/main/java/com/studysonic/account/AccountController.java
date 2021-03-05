@@ -10,6 +10,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.validation.Valid;
@@ -64,8 +65,7 @@ public class AccountController {
             return view;
         }
 
-        account.completeSignUp();
-        accountService.login(account);
+        accountService.completeSignUp(account);//여기에는 트랜잭션이 없음..서비스에 위임해서 트랜잭셔널 어노테이션 추가해야함
         model.addAttribute("numberOfUser",accountRepository.count());
         model.addAttribute("nickname",account.getNickname());
 
@@ -88,6 +88,20 @@ public class AccountController {
 
         accountService.sendSignUpConfirmEmail(account);
         return "redirect:/";
+    }
+
+    @GetMapping("/profile/{nickname}")
+    public String viewProfile(@PathVariable String nickname, Model model, @CurrentUser Account account){
+        Account byNickname = accountRepository.findByNickname(nickname);
+        if(nickname == null){
+            throw new IllegalArgumentException(nickname +"에 해당하는 사용자가 없습니다.");
+        }
+
+        model.addAttribute(byNickname); //여기에 따로 어트리뷰트 이름을 주지 않으면 객체의 캐멀케이스 들어감. 여기선 "account"
+        model.addAttribute("isOwner",byNickname.equals(account));
+        return "account/profile";
+
+
     }
 
 

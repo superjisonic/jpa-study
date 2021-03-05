@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.validation.Valid;
 
 @RequiredArgsConstructor
+@Transactional
 @Service
 public class AccountService implements UserDetailsService {
 
@@ -30,7 +31,7 @@ public class AccountService implements UserDetailsService {
     //스프링시큐리티 설정을 다르게 해줘야 이걸 주입받을 수 있음. (현재 설정상 노출 안됨)
     //private final AuthenticationManager authenticationManager;
 
-    @Transactional
+
     public Account processNewAccount(SignUpForm signUpForm) {
         //새 계정 저장하기
         Account newAccount = saveNewAccount(signUpForm);
@@ -89,6 +90,7 @@ public class AccountService implements UserDetailsService {
         //context.setAuthentication(authentication);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public UserDetails loadUserByUsername(String emailOrNickname) throws UsernameNotFoundException {
         Account account = accountRepository.findByEmail(emailOrNickname);
@@ -99,5 +101,13 @@ public class AccountService implements UserDetailsService {
             throw new UsernameNotFoundException(emailOrNickname);
         }
         return new UserAccount(account);//principal에 해당하는 유저 정보를 넘기면된다.
+    }
+
+    //Lazy Loading : 모든걸 한꺼번에 읽어와서 모델에 담아주는게 아니라, 뷰에서 도메인 기반으로 객체 네비게이션을 하면서 추가로 로딩을 할 수 있음 -> 도메인 기반 코딩이 수월해짐
+    // 데이터 변경은 서비스 계층으로 위임해서 트랜잭션 안에서 처리. (그래야지 DB에 반영이 됨)
+    // 데이터 조회는 리파지토리 또는 서비스를 사용한다 (조회는 굳이 트랜잭션이 없어도 되긴함. 그래서 뷰를 렌더링할때 레이지 로딩을 할 수 있음)
+   public void completeSignUp(Account account){
+        account.completeSignUp();
+        login(account);
     }
 }
