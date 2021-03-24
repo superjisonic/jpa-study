@@ -3,6 +3,7 @@ package com.studysonic.account;
 import java.util.List;
 
 import com.studysonic.domain.Account;
+import com.studysonic.settings.Profile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -109,5 +110,16 @@ public class AccountService implements UserDetailsService {
    public void completeSignUp(Account account){
         account.completeSignUp();
         login(account);
+    }
+
+    public void updateProfile(Account account, Profile profile) {
+        account.setUrl(profile.getUrl());
+        account.setOccupation(profile.getOccupation());
+        account.setLocation(profile.getLocation());
+        account.setBio(profile.getBio());
+        //Detached객체를 업데이트 시키는 방법 -> save를 구현해서 업데이트 해준다.
+        accountRepository.save(account);
+        //TODO 프로필 이미지 수정
+        //TODO 문제가 하나 더 남아있다...
     }
 }
